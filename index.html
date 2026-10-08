@@ -2,15 +2,17 @@
 <html lang="id"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kirim pesan rahasia</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="style.css">
 </head><body><main>
-<h1>Kirim pesan rahasia</h1>
-<p class="sub">Tulis apa saja. Identitasmu tidak disimpan, dan pesan hanya bisa dibaca pemilik web ini.</p>
-<div>
+<div class="frame">
+  <h1>Kirim pesan rahasia</h1>
+  <div class="orn" aria-hidden="true"></div>
+  <p class="sub">Tulis apa saja yang ingin kamu sampaikan. Identitasmu tidak disimpan, dan hanya pemilik web ini yang bisa membaca pesanmu.</p>
   <label for="dari">Dari (opsional, boleh nama samaran)</label>
   <input id="dari" maxlength="40" placeholder="Anonim">
   <label for="pesan">Pesanmu <span class="count" id="cnt">0/600</span></label>
-  <textarea id="pesan" maxlength="600"></textarea>
+  <textarea id="pesan" maxlength="600" placeholder="Tulis pesanmu di sini…"></textarea>
   <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
   <button id="kirim">Kirim pesan</button>
   <div class="msg" id="msg" role="status"></div>
