@@ -60,3 +60,9 @@ button:disabled{opacity:.5;cursor:wait;transform:none}
 /* halaman pesan */
 canvas{display:block;width:100%;height:auto;margin-top:18px;border:1px solid var(--gold-d);box-shadow:0 30px 70px rgba(0,0,0,.6)}
 .acts{display:flex;gap:10px}
+
+/* kolom jawaban & pilihan ukuran (halaman pesan) */
+.panel{padding:22px 24px 26px;margin-top:16px}
+select{width:100%;padding:13px 15px;font:inherit;color:var(--ivory);background:rgba(0,0,0,.35);border:1px solid rgba(217,184,114,.30);border-radius:2px}
+select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,184,114,.15)}
+option{background:#0a1c18}
