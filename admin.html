@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Pesan masuk</title>
+<link rel="stylesheet" href="style.css">
+</head><body><main>
+<div id="login">
+  <h1>Masuk</h1>
+  <p class="sub">Halaman ini hanya untuk pemilik.</p>
+  <label for="key">Kunci admin</label>
+  <input id="key" type="password" autocomplete="current-password">
+  <button id="masuk">Buka pesan masuk</button>
+  <div class="msg" id="err" role="alert"></div>
+</div>
+<div id="inbox" hidden>
+  <div class="bar"><h1>Pesan masuk</h1><button class="ghost" id="keluar">Keluar</button></div>
+  <p class="sub" id="total"></p>
+  <div id="list"></div>
+</div>
+</main>
+<script src="config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const fmt = t => new Date(t).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+
+async function muat() {
+  const key = sessionStorage.getItem("key");
+  if (!key) return;
+  $("err").textContent = "Memuat…";
+  try {
+    const r = await api({ action: "list", key });
+    if (!r.ok) { sessionStorage.removeItem("key"); $("err").textContent = r.error; return; }
+    $("login").hidden = true; $("inbox").hidden = false;
+    $("total").textContent = r.data.length ? r.data.length + " pesan" : "Belum ada pesan. Bagikan tautan halaman kirim pesan.";
+    const list = $("list"); list.textContent = "";
+    r.data.forEach(m => {
+      const a = document.createElement("a");
+      a.className = "item"; a.href = "pesan.html?id=" + encodeURIComponent(m.id);
+      const s = document.createElement("small"); s.textContent = m.dari + " · " + fmt(m.waktu);
+      const p = document.createElement("p"); p.textContent = m.pesan; // textContent: aman dari XSS
+      a.append(s, p); list.append(a);
+    });
+  } catch { $("err").textContent = "Gagal terhubung ke server."; }
+}
+$("masuk").onclick = () => { sessionStorage.setItem("key", $("key").value); muat(); };
+$("keluar").onclick = () => { sessionStorage.removeItem("key"); location.reload(); };
+muat();
+</script></body></html>
