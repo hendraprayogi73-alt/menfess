@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kirim pesan rahasia</title>
+<link rel="stylesheet" href="style.css">
+</head><body><main>
+<h1>Kirim pesan rahasia</h1>
+<p class="sub">Tulis apa saja. Identitasmu tidak disimpan, dan pesan hanya bisa dibaca pemilik web ini.</p>
+<div>
+  <label for="dari">Dari (opsional, boleh nama samaran)</label>
+  <input id="dari" maxlength="40" placeholder="Anonim">
+  <label for="pesan">Pesanmu <span class="count" id="cnt">0/600</span></label>
+  <textarea id="pesan" maxlength="600"></textarea>
+  <input class="hp" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <button id="kirim">Kirim pesan</button>
+  <div class="msg" id="msg" role="status"></div>
+</div>
+</main>
+<script src="config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+$("pesan").addEventListener("input", e => $("cnt").textContent = e.target.value.length + "/600");
+$("kirim").onclick = async () => {
+  const pesan = $("pesan").value.trim();
+  if (pesan.length < 2) { $("msg").textContent = "Tulis pesanmu dulu."; return; }
+  $("kirim").disabled = true; $("msg").textContent = "Mengirim…";
+  try {
+    const r = await api({ action: "send", dari: $("dari").value, pesan, website: $("website").value });
+    if (r.ok) { $("msg").textContent = "Pesan terkirim. Terima kasih."; $("pesan").value = ""; $("cnt").textContent = "0/600"; }
+    else $("msg").textContent = r.error || "Gagal mengirim. Coba lagi.";
+  } catch { $("msg").textContent = "Gagal terhubung. Periksa koneksi lalu coba lagi."; }
+  $("kirim").disabled = false;
+};
+</script></body></html>
