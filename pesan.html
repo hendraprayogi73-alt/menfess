@@ -51,6 +51,12 @@ async function gambar(m) {
   const bg = ctx.createRadialGradient(W / 2, H * 0.4, 100, W / 2, H / 2, H * 0.8);
   bg.addColorStop(0, "#14302a"); bg.addColorStop(1, "#06100e");
   ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  const img = BG_DI_GAMBAR ? await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = "background.jpg"; }) : null;
+  if (img) { // gambar latar (cover) + lapisan gelap agar teks tetap terbaca
+    const k = Math.max(W / img.width, H / img.height), w = img.width * k, h = img.height * k;
+    ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+    ctx.fillStyle = "rgba(6,16,14,.72)"; ctx.fillRect(0, 0, W, H);
+  }
 
   // bingkai ganda
   ctx.strokeStyle = gold; ctx.lineWidth = 6; ctx.strokeRect(48, 48, W - 96, H - 96);
