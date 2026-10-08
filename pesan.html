@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Isi pesan</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Cinzel:wght@500&display=swap">
+</head><body><main>
+<div class="bar">
+  <a class="btn ghost" href="admin.html">Kembali</a>
+  <div>
+    <button class="ghost" id="hapus" hidden>Hapus</button>
+    <button id="unduh" hidden>Unduh gambar</button>
+  </div>
+</div>
+<div class="msg" id="err" role="alert">Memuat…</div>
+<canvas id="c" width="1080" height="1350" hidden></canvas>
+</main>
+<script src="config.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const key = sessionStorage.getItem("key");
+const id = new URLSearchParams(location.search).get("id");
+if (!key || !id) location.replace("admin.html");
+let pesan;
+
+function wrap(ctx, text, maxW) {
+  const lines = [];
+  text.split("\n").forEach(par => {
+    let line = "";
+    par.split(/\s+/).filter(Boolean).forEach(w => {
+      while (ctx.measureText(w).width > maxW) { // kata sangat panjang dipotong
+        let i = w.length; while (i > 1 && ctx.measureText(w.slice(0, i)).width > maxW) i--;
+        if (line) { lines.push(line); line = ""; }
+        lines.push(w.slice(0, i)); w = w.slice(i);
+      }
+      const t = line ? line + " " + w : w;
+      if (ctx.measureText(t).width > maxW) { lines.push(line); line = w; } else line = t;
+    });
+    lines.push(line);
+  });
+  return lines;
+}
+
+async function gambar(m) {
+  await Promise.all([document.fonts.load('italic 500 60px "Cormorant Garamond"'), document.fonts.load('500 30px "Cinzel"')]);
+  const c = $("c"), ctx = c.getContext("2d"), W = 1080, H = 1350;
+  const gold = ctx.createLinearGradient(0, 0, W, H);
+  ["#f3e2b3", "#c9a24b", "#8c6a24", "#e8cf94", "#b58a35"].forEach((col, i, a) => gold.addColorStop(i / (a.length - 1), col));
+
+  const bg = ctx.createRadialGradient(W / 2, H * 0.4, 100, W / 2, H / 2, H * 0.8);
+  bg.addColorStop(0, "#14302a"); bg.addColorStop(1, "#06100e");
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  // bingkai ganda
+  ctx.strokeStyle = gold; ctx.lineWidth = 6; ctx.strokeRect(48, 48, W - 96, H - 96);
+  ctx.lineWidth = 2; ctx.strokeRect(74, 74, W - 148, H - 148);
+  ctx.fillStyle = gold;
+  [[74, 74], [W - 74, 74], [74, H - 74], [W - 74, H - 74]].forEach(([x, y]) => {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4); ctx.fillRect(-12, -12, 24, 24); ctx.restore();
+  });
+
+  ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+  ctx.letterSpacing = "10px"; ctx.font = '500 34px Cinzel, Georgia, serif';
+  ctx.fillText("PESAN UNTUKMU", W / 2, 190);
+  ctx.letterSpacing = "0px";
+  ctx.fillRect(W / 2 - 90, 225, 180, 3);
+
+  ctx.font = '500 220px "Cormorant Garamond", Georgia, serif';
+  ctx.globalAlpha = .55; ctx.fillText("\u201C", W / 2, 440); ctx.globalAlpha = 1;
+
+  // isi pesan: ukuran font menyesuaikan panjang teks
+  const areaW = 760, areaTop = 480, areaH = 560;
+  let size = 68, lines, lh;
+  for (; size >= 30; size -= 2) {
+    ctx.font = `italic 500 ${size}px "Cormorant Garamond", Georgia, serif`;
+    lines = wrap(ctx, m.pesan, areaW); lh = size * 1.4;
+    if (lines.length * lh <= areaH) break;
+  }
+  const y0 = areaTop + (areaH - lines.length * lh) / 2 + size;
+  ctx.fillStyle = "#f6ecd2";
+  lines.forEach((l, i) => ctx.fillText(l, W / 2, y0 + i * lh));
+
+  // penutup
+  ctx.fillStyle = gold; ctx.fillRect(W / 2 - 90, 1085, 180, 3);
+  ctx.font = '500 44px "Cormorant Garamond", Georgia, serif';
+  ctx.fillText("dari " + m.dari, W / 2, 1160);
+  ctx.letterSpacing = "6px"; ctx.font = '500 24px Cinzel, Georgia, serif';
+  ctx.fillText(new Date(m.waktu).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }).toUpperCase(), W / 2, 1230);
+  ctx.letterSpacing = "0px";
+  c.hidden = false;
+}
+
+(async () => {
+  try {
+    const r = await api({ action: "get", key, id });
+    if (!r.ok) { $("err").textContent = r.error; if (r.error === "Kunci salah.") location.replace("admin.html"); return; }
+    pesan = r.data; $("err").textContent = "";
+    await gambar(pesan);
+    $("unduh").hidden = false; $("hapus").hidden = false;
+  } catch { $("err").textContent = "Gagal terhubung ke server."; }
+})();
+
+$("unduh").onclick = () => {
+  const a = document.createElement("a");
+  a.download = "pesan-" + id.slice(0, 8) + ".png";
+  a.href = $("c").toDataURL("image/png"); a.click();
+};
+$("hapus").onclick = async () => {
+  if (!confirm("Hapus pesan ini secara permanen?")) return;
+  const r = await api({ action: "delete", key, id });
+  if (r.ok) location.href = "admin.html"; else $("err").textContent = r.error;
+};
+</script></body></html>
