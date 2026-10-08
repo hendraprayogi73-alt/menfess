@@ -1,5 +1,5 @@
 // Tempel URL Web App dari Apps Script (Deploy > Web app) di sini
-const API_URL = "https://script.google.com/macros/s/AKfycby0erB5Ac3OcGdTTed9NANB79Mq4ziXbQof5UHChoq2d3LkQAr5MTpfHqbj9tN3s5Jwdw/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzng32sPaj72WWV-obXVooMDV7AcNCv8Q7gy13IC3fcDFi-ysWndd7kz-Ylugho3gCkcQ/exec";
 
 // Tanpa header Content-Type agar tidak memicu preflight CORS di Apps Script
 async function api(body) {
