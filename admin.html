@@ -1,51 +1,685 @@
+
 <!DOCTYPE html>
-<html lang="id"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<title>Pesan masuk</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="style.css">
-</head><body><main>
-<div id="login" class="frame">
-  <h1>Masuk</h1>
-  <div class="orn" aria-hidden="true"></div>
-  <p class="sub">Halaman ini hanya untuk pemilik.</p>
-  <label for="key">Kunci admin</label>
-  <input id="key" type="password" autocomplete="current-password">
-  <button id="masuk">Buka pesan masuk</button>
-  <div class="msg" id="err" role="alert"></div>
-</div>
-<div id="inbox" hidden>
-  <div class="bar"><h1>Pesan masuk</h1><button class="ghost" id="keluar">Keluar</button></div>
-  <p class="sub" id="total"></p>
-  <div id="list"></div>
-</div>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Dashboard Pesan — Secret Letter</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    [hidden] { display: none !important; }
+
+    .admin-wrap {
+      width: 100%;
+      animation: rise .5s ease both;
+    }
+
+    .admin-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .admin-head h1 {
+      font-size: clamp(2rem, 6vw, 2.7rem);
+    }
+
+    .admin-head .sub {
+      margin: 8px 0 0;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .toolbar button {
+      width: auto;
+      margin: 0;
+      padding: 10px 15px;
+      font-size: .85rem;
+    }
+
+    .toolbar .danger {
+      color: #fff1eb;
+      background: linear-gradient(135deg, #9d382e, #6c211d);
+      box-shadow: 0 5px 18px rgba(150, 40, 30, .2);
+    }
+
+    .toolbar .danger:disabled {
+      opacity: .4;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .stat {
+      padding: 15px 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.035);
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--gold);
+      font: 600 1.8rem/1.2 "Cormorant Garamond", serif;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: .75rem;
+    }
+
+    .select-all {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.15);
+      color: var(--ivory);
+      cursor: pointer;
+    }
+
+    .select-all input,
+    .message-check {
+      width: 18px;
+      height: 18px;
+      min-height: auto;
+      accent-color: var(--gold);
+      cursor: pointer;
+    }
+
+    .message-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .message-card {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 12px;
+      padding: 17px;
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(0,0,0,.17));
+      transition: border-color .2s, transform .2s, background .2s;
+    }
+
+    .message-card.selected {
+      border-color: var(--gold);
+      background: rgba(217,184,114,.07);
+    }
+
+    .message-check {
+      margin-top: 5px;
+    }
+
+    .message-content {
+      min-width: 0;
+    }
+
+    .message-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 7px;
+      color: var(--muted);
+      font-size: .76rem;
+    }
+
+    .message-type {
+      display: inline-block;
+      margin-bottom: 8px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      color: var(--gold);
+      font-size: .7rem;
+      letter-spacing: .05em;
+    }
+
+    .song-info {
+      margin: 7px 0;
+      color: var(--gold);
+      font-size: .85rem;
+      overflow-wrap: anywhere;
+    }
+
+    .message-text {
+      margin: 8px 0 14px;
+      color: var(--ivory);
+      font: 500 1.2rem/1.5 "Cormorant Garamond", Georgia, serif;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .message-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .message-actions a,
+    .message-actions button {
+      display: inline-block;
+      width: auto;
+      margin: 0;
+      padding: 8px 12px;
+      font-size: .78rem;
+    }
+
+    .message-actions .delete-one {
+      color: #ffb8a8;
+      background: transparent;
+      border: 1px solid rgba(255,130,110,.4);
+      box-shadow: none;
+    }
+
+    .empty {
+      padding: 35px 20px;
+      border: 1px dashed var(--line);
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .notice {
+      min-height: 1.5em;
+      margin: 12px 0;
+      color: var(--gold);
+      font-size: .9rem;
+      overflow-wrap: anywhere;
+    }
+
+    .notice.error {
+      color: #ffb3a5;
+    }
+
+    .notice.success {
+      color: #d4eab9;
+    }
+
+    .login-box {
+      max-width: 460px;
+      margin: 25px auto;
+    }
+
+    .login-box button {
+      width: 100%;
+    }
+
+    .login-box h1 {
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 24px 12px; }
+      .stats { gap: 6px; }
+      .stat { padding: 12px 8px; }
+      .stat strong { font-size: 1.5rem; }
+      .toolbar button { flex: 1 1 42%; }
+      .message-card { padding: 12px; gap: 8px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .admin-wrap { animation: none; }
+    }
+  </style>
+</head>
+
+<body>
+<main class="admin-wrap">
+
+  <!-- LOGIN -->
+  <section id="login" class="frame login-box">
+    <h1>Pesan <span style="color:var(--gold)">Rahasia</span></h1>
+    <div class="orn"></div>
+    <p class="sub" style="text-align:center">
+      Dashboard khusus pemilik website.
+    </p>
+
+    <form id="loginForm">
+      <label for="key">Kunci admin</label>
+      <input id="key" type="password"
+             autocomplete="current-password" required>
+
+      <button id="masuk" type="submit">Buka pesan masuk</button>
+      <div class="notice" id="loginNotice" role="status"></div>
+    </form>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="inbox" hidden>
+    <header class="admin-head">
+      <div>
+        <h1>Pesan <span style="color:var(--gold)">Masuk</span></h1>
+        <p class="sub">Kelola Menfess dan Songfess kamu.</p>
+      </div>
+      <button type="button" id="keluar" class="ghost">Keluar</button>
+    </header>
+
+    <div class="stats">
+      <div class="stat">
+        <strong id="total">0</strong>
+        <span>Total pesan</span>
+      </div>
+      <div class="stat">
+        <strong id="totalMenfess">0</strong>
+        <span>Menfess</span>
+      </div>
+      <div class="stat">
+        <strong id="totalSongfess">0</strong>
+        <span>Songfess</span>
+      </div>
+    </div>
+
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+
+    <div class="toolbar">
+      <button type="button" id="refresh" class="ghost">↻ Muat ulang</button>
+      <button type="button" id="deleteSelected" class="danger" disabled>
+        Hapus terpilih (<span id="selectedCount">0</span>)
+      </button>
+      <button type="button" id="deleteAll" class="danger">
+        Hapus semua pesan
+      </button>
+    </div>
+
+    <label class="select-all">
+      <input type="checkbox" id="selectAll">
+      <span>Pilih semua pesan yang tampil</span>
+    </label>
+
+    <div id="list" class="message-list"></div>
+
+    <div id="empty" class="empty" hidden>
+      <div style="font-size:2rem;margin-bottom:8px">✧</div>
+      Belum ada pesan yang tersimpan.
+    </div>
+  </section>
+
 </main>
+
 <script src="config.js"></script>
 <script>
-const $ = id => document.getElementById(id);
-const fmt = t => new Date(t).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
+(() => {
+  "use strict";
 
-async function muat() {
-  const key = sessionStorage.getItem("key");
-  if (!key) return;
-  $("err").textContent = "Memuat…";
-  try {
-    const r = await api({ action: "list", key });
-    if (!r.ok) { sessionStorage.removeItem("key"); $("err").textContent = r.error; return; }
-    $("login").hidden = true; $("inbox").hidden = false;
-    $("total").textContent = r.data.length ? r.data.length + " pesan" : "Belum ada pesan. Bagikan tautan halaman kirim pesan.";
-    const list = $("list"); list.textContent = "";
-    r.data.forEach(m => {
-      const a = document.createElement("a");
-      a.className = "item"; a.href = "pesan.html?id=" + encodeURIComponent(m.id);
-      const s = document.createElement("small"); s.textContent = m.dari + " · " + fmt(m.waktu);
-      const p = document.createElement("p"); p.textContent = m.pesan; // textContent: aman dari XSS
-      a.append(s, p); list.append(a);
+  const $ = id => document.getElementById(id);
+  const login = $("login");
+  const inbox = $("inbox");
+  const list = $("list");
+
+  let messages = [];
+  let busy = false;
+
+  function setNotice(text, type = "") {
+    const el = $("notice");
+    el.textContent = text;
+    el.className = "notice " + type;
+  }
+
+  function setLoginNotice(text) {
+    $("loginNotice").textContent = text;
+  }
+
+  function getKey() {
+    return sessionStorage.getItem("key") || "";
+  }
+
+  function getId(message) {
+    return String(message.id ?? "");
+  }
+
+  function selectedIds() {
+    return [...document.querySelectorAll(".message-check:checked")]
+      .map(el => el.value)
+      .filter(Boolean);
+  }
+
+  function updateSelection() {
+    const checked = selectedIds();
+    $("selectedCount").textContent = checked.length;
+    $("deleteSelected").disabled = checked.length === 0 || busy;
+
+    const allChecks = [...document.querySelectorAll(".message-check")];
+    $("selectAll").checked =
+      allChecks.length > 0 && allChecks.every(el => el.checked);
+    $("selectAll").indeterminate =
+      checked.length > 0 && checked.length < allChecks.length;
+
+    allChecks.forEach(el => {
+      el.closest(".message-card")?.classList.toggle("selected", el.checked);
     });
-  } catch { $("err").textContent = "Gagal terhubung ke server."; }
-}
-$("masuk").onclick = () => { sessionStorage.setItem("key", $("key").value); muat(); };
-$("keluar").onclick = () => { sessionStorage.removeItem("key"); location.reload(); };
-muat();
-</script></body></html>
+  }
+
+  function fmt(value) {
+    if (!value) return "Waktu tidak tersedia";
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+
+    return date.toLocaleString("id-ID", {
+      dateStyle: "medium",
+      timeStyle: "short"
+    });
+  }
+
+  function isSong(message) {
+    const kind = String(message.jenis || message.tipe || "").toLowerCase();
+    return kind === "songfess" ||
+      Boolean(message.lagu || message.penyanyi);
+  }
+
+  function updateStats() {
+    $("total").textContent = messages.length;
+    $("totalSongfess").textContent = messages.filter(isSong).length;
+    $("totalMenfess").textContent = messages.length -
+      messages.filter(isSong).length;
+  }
+
+  function render() {
+    list.replaceChildren();
+    $("empty").hidden = messages.length > 0;
+    updateStats();
+
+    messages.forEach(message => {
+      const id = getId(message);
+      const card = document.createElement("article");
+      card.className = "message-card";
+
+      const check = document.createElement("input");
+      check.type = "checkbox";
+      check.className = "message-check";
+      check.value = id;
+      check.setAttribute("aria-label", "Pilih pesan " + id);
+      check.addEventListener("change", updateSelection);
+
+      const content = document.createElement("div");
+      content.className = "message-content";
+
+      const type = document.createElement("span");
+      type.className = "message-type";
+      type.textContent = isSong(message) ? "♫ SONGFESS" : "✉ MENFESS";
+
+      const meta = document.createElement("div");
+      meta.className = "message-meta";
+
+      const sender = document.createElement("span");
+      sender.textContent = "Dari: " + (message.dari || "Anonim");
+
+      const time = document.createElement("span");
+      time.textContent = fmt(message.waktu);
+
+      meta.append(sender, time);
+
+      content.append(type, meta);
+
+      if (isSong(message)) {
+        const songInfo = document.createElement("div");
+        songInfo.className = "song-info";
+        songInfo.textContent =
+          "♫ " + (message.lagu || "Judul lagu tidak tersedia") +
+          (message.penyanyi ? " — " + message.penyanyi : "");
+        content.append(songInfo);
+      }
+
+      const text = document.createElement("p");
+      text.className = "message-text";
+      text.textContent = message.pesan || "(Pesan kosong)";
+      content.append(text);
+
+      const actions = document.createElement("div");
+      actions.className = "message-actions";
+
+      const detail = document.createElement("a");
+      detail.className = "btn ghost";
+      detail.href = "pesan.html?id=" + encodeURIComponent(id);
+      detail.textContent = "Lihat detail";
+      actions.append(detail);
+
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "delete-one";
+      del.textContent = "Hapus";
+      del.addEventListener("click", () => deleteOne(id));
+      actions.append(del);
+
+      content.append(actions);
+      card.append(check, content);
+      list.append(card);
+    });
+
+    $("selectAll").checked = false;
+    $("selectAll").indeterminate = false;
+    updateSelection();
+  }
+
+  async function loadMessages() {
+    if (busy) return;
+
+    busy = true;
+    $("refresh").disabled = true;
+    setNotice("Memuat pesan...");
+
+    try {
+      const result = await api({ action: "list", key: getKey() });
+
+      if (!result || !result.ok) {
+        if (result && /kunci|admin|login|akses/i.test(result.error || "")) {
+          sessionStorage.removeItem("key");
+          inbox.hidden = true;
+          login.hidden = false;
+          setLoginNotice(result.error || "Akses ditolak.");
+          return;
+        }
+
+        setNotice(result?.error || "Gagal memuat pesan.", "error");
+        return;
+      }
+
+      messages = Array.isArray(result.data) ? result.data : [];
+      render();
+      setNotice("Pesan berhasil dimuat.", "success");
+    } catch (error) {
+      console.error(error);
+      setNotice("Tidak dapat terhubung ke server.", "error");
+    } finally {
+      busy = false;
+      $("refresh").disabled = false;
+      updateSelection();
+    }
+  }
+
+  async function deleteOne(id) {
+    if (!id) {
+      setNotice("ID pesan tidak tersedia.", "error");
+      return;
+    }
+
+    if (!confirm("Hapus pesan ini secara permanen?")) return;
+    if (busy) return;
+
+    busy = true;
+    setNotice("Menghapus pesan...");
+
+    try {
+      const result = await api({
+        action: "delete",
+        key: getKey(),
+        id: id
+      });
+
+      if (!result || !result.ok) {
+        setNotice(result?.error || "Pesan gagal dihapus.", "error");
+        return;
+      }
+
+      messages = messages.filter(m => getId(m) !== id);
+      render();
+      setNotice("Pesan berhasil dihapus.", "success");
+    } catch (error) {
+      console.error(error);
+      setNotice("Gagal menghubungi server saat menghapus.", "error");
+    } finally {
+      busy = false;
+      updateSelection();
+    }
+  }
+
+  async function deleteMany(ids, deleteAll = false) {
+    if (busy) return;
+
+    if (!ids.length) {
+      setNotice("Pilih minimal satu pesan terlebih dahulu.", "error");
+      return;
+    }
+
+    const confirmation = deleteAll
+      ? "PERINGATAN: Hapus SEMUA " + ids.length +
+        " pesan secara permanen? Tindakan ini tidak dapat dibatalkan."
+      : "Hapus " + ids.length + " pesan yang dipilih secara permanen?";
+
+    if (!confirm(confirmation)) return;
+
+    busy = true;
+    $("deleteSelected").disabled = true;
+    $("deleteAll").disabled = true;
+    $("refresh").disabled = true;
+    setNotice("Menghapus pesan yang dipilih...");
+
+    try {
+      /*
+       * Backend wajib mendukung action deleteMany.
+       * Jangan mengganti ini dengan penghapusan lokal saja.
+       */
+      const result = await api({
+        action: "deleteMany",
+        key: getKey(),
+        ids: ids,
+        deleteAll: deleteAll
+      });
+
+      if (!result || !result.ok) {
+        setNotice(
+          result?.error ||
+          "Server belum mendukung penghapusan massal. Perbarui backend Apps Script.",
+          "error"
+        );
+        return;
+      }
+
+      setNotice(
+        "Berhasil menghapus " + (result.deleted ?? ids.length) + " pesan.",
+        "success"
+      );
+
+      await loadMessages();
+    } catch (error) {
+      console.error(error);
+      setNotice("Gagal menghubungi server. Tidak ada perubahan lokal yang diasumsikan.", "error");
+    } finally {
+      busy = false;
+      $("deleteAll").disabled = false;
+      $("refresh").disabled = false;
+      updateSelection();
+    }
+  }
+
+  $("selectAll").addEventListener("change", event => {
+    document.querySelectorAll(".message-check").forEach(el => {
+      el.checked = event.target.checked;
+    });
+    updateSelection();
+  });
+
+  $("deleteSelected").addEventListener("click", () => {
+    deleteMany(selectedIds(), false);
+  });
+
+  $("deleteAll").addEventListener("click", () => {
+    deleteMany(messages.map(getId).filter(Boolean), true);
+  });
+
+  $("refresh").addEventListener("click", loadMessages);
+
+  $("loginForm").addEventListener("submit", async event => {
+    event.preventDefault();
+
+    const key = $("key").value.trim();
+    if (!key) {
+      setLoginNotice("Masukkan kunci admin.");
+      return;
+    }
+
+    sessionStorage.setItem("key", key);
+    setLoginNotice("Memeriksa akses...");
+
+    try {
+      const result = await api({ action: "list", key });
+
+      if (!result || !result.ok) {
+        sessionStorage.removeItem("key");
+        setLoginNotice(result?.error || "Kunci admin tidak valid.");
+        return;
+      }
+
+      messages = Array.isArray(result.data) ? result.data : [];
+      login.hidden = true;
+      inbox.hidden = false;
+      render();
+      setNotice("Berhasil masuk ke dashboard.", "success");
+    } catch (error) {
+      console.error(error);
+      sessionStorage.removeItem("key");
+      setLoginNotice("Server tidak dapat dihubungi.");
+    }
+  });
+
+  $("keluar").addEventListener("click", () => {
+    sessionStorage.removeItem("key");
+    messages = [];
+    inbox.hidden = true;
+    login.hidden = false;
+    $("key").value = "";
+    setLoginNotice("Kamu telah keluar.");
+  });
+
+  async function start() {
+    if (!getKey()) return;
+
+    try {
+      const result = await api({ action: "list", key: getKey() });
+
+      if (result && result.ok) {
+        messages = Array.isArray(result.data) ? result.data : [];
+        login.hidden = true;
+        inbox.hidden = false;
+        render();
+      } else {
+        sessionStorage.removeItem("key");
+      }
+    } catch (error) {
+      console.error(error);
+      setLoginNotice("Gagal memeriksa sesi. Silakan masuk kembali.");
+    }
+  }
+
+  start();
+})();
+</script>
+</body>
+</html>
