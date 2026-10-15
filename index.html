@@ -4,482 +4,45 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#100c18">
-  <meta name="description" content="Kirim Menfess dan Songfess secara anonim. Sampaikan isi hati lewat pesan dan lagu.">
-  <title>Secret Letter — Menfess & Songfess</title>
+  <meta name="theme-color" content="#06110e">
+  <meta name="description" content="Kirim Menfess dan Songfess secara rahasia.">
+  <title>Secret Letter — Menfess &amp; Songfess</title>
 
-  <!-- Tidak memerlukan framework atau font eksternal -->
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #100c18;
-      --panel: rgba(29, 22, 39, .88);
-      --pink: #ff80b5;
-      --purple: #bd9aff;
-      --text: #fff4fa;
-      --muted: #b8a9c4;
-      --border: rgba(255, 255, 255, .10);
-    }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
 
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      min-height: 100%;
-      background: var(--bg);
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: "Segoe UI", Arial, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(ellipse at 15% 15%, #482043 0, transparent 40%),
-        radial-gradient(ellipse at 85% 80%, #25245a 0, transparent 42%),
-        linear-gradient(145deg, #100c18, #171022 55%, #0c1020);
-      overflow-x: hidden;
-    }
-
-    /* Cahaya dekoratif di latar */
-    .ambient {
-      position: fixed;
-      width: 260px;
-      height: 260px;
-      border-radius: 50%;
-      filter: blur(90px);
-      opacity: .25;
-      pointer-events: none;
-      z-index: 0;
-      animation: floatLight 12s ease-in-out infinite alternate;
-    }
-
-    .ambient.one {
-      background: #ff4f9a;
-      top: 5%;
-      left: -130px;
-    }
-
-    .ambient.two {
-      background: #8067ff;
-      bottom: 0;
-      right: -130px;
-      animation-delay: -5s;
-    }
-
-    main {
-      min-height: 100vh;
-      padding: 38px 16px;
-      display: grid;
-      place-items: center;
-      position: relative;
-      z-index: 1;
-    }
-
-    .frame {
-      width: min(100%, 510px);
-      position: relative;
-      padding: 34px;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, .13);
-      border-radius: 27px;
-      background: var(--panel);
-      box-shadow:
-        0 30px 90px rgba(0, 0, 0, .38),
-        0 0 55px rgba(191, 115, 255, .08),
-        inset 0 1px rgba(255, 255, 255, .07);
-      backdrop-filter: blur(16px);
-      animation: enter .8s cubic-bezier(.2,.8,.2,1) both;
-    }
-
-    .frame::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 10%;
-      width: 80%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--pink), var(--purple), transparent);
-      box-shadow: 0 0 20px var(--pink);
-    }
-
-    .brand {
-      text-align: center;
-      margin-bottom: 27px;
-    }
-
-    .icon {
-      width: 65px;
-      height: 65px;
-      margin: 0 auto 17px;
-      display: grid;
-      place-items: center;
-      font-size: 29px;
-      border: 1px solid rgba(255, 128, 181, .35);
-      border-radius: 22px;
-      background: linear-gradient(145deg, rgba(255,128,181,.17), rgba(189,154,255,.12));
-      box-shadow: 0 0 35px rgba(255, 128, 181, .12);
-      animation: iconPulse 3s ease-in-out infinite;
-    }
-
-    h1 {
-      font-family: Georgia, "Times New Roman", serif;
-      font-weight: 500;
-      font-size: clamp(27px, 6vw, 36px);
-      line-height: 1.2;
-      margin: 0;
-      letter-spacing: -.6px;
-    }
-
-    h1 span {
-      color: var(--pink);
-      font-style: italic;
-    }
-
-    .sub {
-      margin: 12px auto 0;
-      max-width: 370px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.8;
-    }
-
-    .orn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 22px 0;
-      color: var(--pink);
-      font-size: 12px;
-      letter-spacing: 4px;
-    }
-
-    .orn::before, .orn::after {
-      content: "";
-      height: 1px;
-      flex: 1;
-      background: linear-gradient(90deg, transparent, rgba(255,128,181,.5));
-    }
-
-    .orn::after {
-      transform: rotate(180deg);
-    }
-
-    .modes {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 23px;
-    }
-
-    .mode {
-      appearance: none;
-      color: var(--muted);
-      background: rgba(255,255,255,.025);
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      padding: 14px 10px;
-      cursor: pointer;
-      font: inherit;
-      font-size: 13px;
-      transition: background .2s, border-color .2s, transform .2s;
-    }
-
-    .mode:hover {
-      transform: translateY(-2px);
-      border-color: rgba(255,128,181,.5);
-    }
-
-    .mode.active {
-      color: white;
-      border-color: rgba(255,128,181,.65);
-      background: linear-gradient(135deg, rgba(255,128,181,.17), rgba(189,154,255,.12));
-      box-shadow: 0 0 22px rgba(255,128,181,.07);
-    }
-
-    .mode strong {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 14px;
-    }
-
-    .mode small {
-      font-size: 11px;
-      opacity: .8;
-    }
-
-    .field {
-      margin-bottom: 19px;
-    }
-
-    label {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 9px;
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: .3px;
-      color: #f4dbea;
-    }
-
-    .optional {
-      color: #a99ab6;
-      font-size: 11px;
-      font-weight: 400;
-    }
-
-    input, textarea {
-      display: block;
-      width: 100%;
-      border: 1px solid rgba(255,255,255,.105);
-      border-radius: 12px;
-      background: rgba(8, 7, 16, .45);
-      padding: 14px 15px;
-      color: white;
-      font: inherit;
-      font-size: 14px;
-      outline: none;
-      transition: border-color .2s, box-shadow .2s, background .2s;
-    }
-
-    input {
-      min-height: 47px;
-    }
-
-    textarea {
-      min-height: 145px;
-      resize: vertical;
-      line-height: 1.75;
-    }
-
-    input::placeholder, textarea::placeholder {
-      color: #82738f;
-    }
-
-    input:focus, textarea:focus {
-      border-color: rgba(255,128,181,.75);
-      background: rgba(8,7,16,.7);
-      box-shadow: 0 0 0 3px rgba(255,128,181,.08);
-    }
-
-    .count {
-      color: #bda5c6;
-      font-size: 11px;
-      font-weight: 400;
-    }
-
-    .song-fields {
-      display: none;
-      animation: fadeIn .25s ease both;
-    }
-
-    .song-fields.visible {
-      display: block;
-    }
-
-    .song-note {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.6;
-      margin-top: 8px;
-    }
-
-    .hp {
-      position: absolute !important;
-      left: -10000px !important;
-      width: 1px !important;
-      height: 1px !important;
-      opacity: 0 !important;
-    }
-
-    .submit {
-      width: 100%;
-      min-height: 51px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-top: 6px;
-      border: 0;
-      border-radius: 13px;
-      color: #27101e;
-      background: linear-gradient(110deg, #ff9cc7, #d5a9ff);
-      font: inherit;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 7px 28px rgba(226,128,193,.17);
-      transition: transform .2s, box-shadow .2s, opacity .2s;
-    }
-
-    .submit:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 32px rgba(226,128,193,.28);
-    }
-
-    .submit:active:not(:disabled) {
-      transform: scale(.985);
-    }
-
-    .submit:disabled {
-      cursor: wait;
-      opacity: .75;
-    }
-
-    .spinner {
-      display: none;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(39,16,30,.25);
-      border-top-color: #27101e;
-      border-radius: 50%;
-      animation: spin .65s linear infinite;
-    }
-
-    .submit.loading .spinner {
-      display: inline-block;
-    }
-
-    .msg {
-      display: none;
-      margin-top: 17px;
-      padding: 13px 14px;
-      border-radius: 11px;
-      font-size: 12px;
-      line-height: 1.7;
-      overflow-wrap: anywhere;
-    }
-
-    .msg.show {
-      display: block;
-      animation: fadeIn .25s ease both;
-    }
-
-    .msg.success {
-      color: #b7f6d1;
-      background: rgba(50,190,120,.09);
-      border: 1px solid rgba(90,220,155,.2);
-    }
-
-    .msg.error {
-      color: #ffb4c5;
-      background: rgba(255,70,110,.08);
-      border: 1px solid rgba(255,100,140,.2);
-    }
-
-    .privacy {
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 7px;
-      margin-top: 20px;
-      color: #9e91aa;
-      font-size: 11px;
-      line-height: 1.7;
-      text-align: center;
-    }
-
-    footer {
-      text-align: center;
-      color: #8c7e9b;
-      font-size: 10px;
-      margin-top: 25px;
-      letter-spacing: 1px;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    @keyframes enter {
-      from { opacity: 0; transform: translateY(25px) scale(.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(7px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes floatLight {
-      from { transform: translate(0, 0) scale(1); }
-      to { transform: translate(45px, -35px) scale(1.2); }
-    }
-
-    @keyframes iconPulse {
-      0%, 100% { box-shadow: 0 0 20px rgba(255,128,181,.08); }
-      50% { box-shadow: 0 0 32px rgba(255,128,181,.2); }
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    @media (max-width: 520px) {
-      main {
-        padding: 20px 12px;
-      }
-
-      .frame {
-        padding: 25px 20px;
-        border-radius: 22px;
-      }
-
-      .brand {
-        margin-bottom: 23px;
-      }
-
-      textarea {
-        min-height: 130px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: .01ms !important;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <div class="ambient one" aria-hidden="true"></div>
-  <div class="ambient two" aria-hidden="true"></div>
-
   <main>
     <section class="frame">
       <header class="brand">
-        <div class="icon" aria-hidden="true">💌</div>
-        <h1>Secret <span>Letter</span></h1>
+        <div class="icon" aria-hidden="true">✉</div>
+        <h1>Secret Letter</h1>
         <p class="sub">
           Ada sesuatu yang ingin kamu sampaikan?
-          Kirim pesan rahasia atau titipkan sebuah lagu untuk seseorang.
+          Kirim pesan rahasia atau titipkan lagu untuk seseorang.
         </p>
+        <div class="orn" aria-hidden="true"></div>
       </header>
 
-      <div class="orn" aria-hidden="true">✦ ✧ ✦</div>
-
-      <div class="modes" role="group" aria-label="Pilih jenis pesan">
-        <button type="button" class="mode active" data-mode="menfess"
-                aria-pressed="true">
-          <strong>💌 Menfess</strong>
+      <div class="modes" role="group" aria-label="Jenis pesan">
+        <button type="button" class="mode active"
+                data-mode="menfess" aria-pressed="true">
+          <strong>✉ Menfess</strong>
           <small>Pesan dari hati</small>
         </button>
 
-        <button type="button" class="mode" data-mode="songfess"
-                aria-pressed="false">
-          <strong>🎧 Songfess</strong>
+        <button type="button" class="mode"
+                data-mode="songfess" aria-pressed="false">
+          <strong>♫ Songfess</strong>
           <small>Pesan lewat lagu</small>
         </button>
       </div>
 
-      <form id="form" novalidate>
+      <form id="form">
         <div class="field">
           <label for="dari">
             Dari
@@ -493,22 +56,17 @@
           <div class="field">
             <label for="lagu">Judul lagu</label>
             <input id="lagu" name="lagu" maxlength="120"
-                   placeholder="Contoh: Sempurna">
+                   placeholder="Contoh: Hati-Hati di Jalan">
           </div>
 
           <div class="field">
             <label for="penyanyi">
-              Penyanyi
+              Nama penyanyi
               <span class="optional">Opsional</span>
             </label>
             <input id="penyanyi" name="penyanyi" maxlength="100"
-                   placeholder="Nama penyanyi atau band">
+                   placeholder="Contoh: Tulus">
           </div>
-
-          <p class="song-note">
-            🎶 Tambahkan lagu yang mewakili perasaan atau pesanmu.
-            Pastikan judul lagu diisi untuk Songfess.
-          </p>
         </div>
 
         <div class="field">
@@ -516,12 +74,16 @@
             <span id="messageLabel">Pesanmu</span>
             <span class="count" id="cnt">0/600</span>
           </label>
+
           <textarea id="pesan" name="pesan" maxlength="600"
-                    placeholder="Tulis apa yang ingin kamu sampaikan…"
+                    placeholder="Tulis apa yang ingin kamu sampaikan..."
                     required></textarea>
         </div>
 
-        <!-- Honeypot anti-bot sederhana -->
+        <p class="song-note" id="songNote">
+          Songfess dikirim dalam bentuk teks, tanpa audio.
+        </p>
+
         <input class="hp" id="website" name="website"
                tabindex="-1" autocomplete="off" aria-hidden="true">
 
@@ -536,18 +98,17 @@
       </form>
 
       <div class="privacy">
-        <span aria-hidden="true">🔒</span>
+        <span aria-hidden="true">◆</span>
         <span>
-          Kirim tanpa mencantumkan nama asli jika kamu mau.
+          Kamu boleh menggunakan nama samaran.
           Hindari membagikan informasi pribadi yang sensitif.
         </span>
       </div>
 
-      <footer>MADE WITH ♡ · A LITTLE SPACE FOR YOUR FEELINGS</footer>
+      <footer>MADE WITH ♡ · YOUR LITTLE SECRET SPACE</footer>
     </section>
   </main>
 
-  <!-- File API milikmu tetap digunakan -->
   <script src="config.js"></script>
 
   <script>
@@ -565,6 +126,7 @@
       const buttonText = $("buttonText");
       const buttonIcon = $("buttonIcon");
       const songFields = $("songFields");
+      const songNote = $("songNote");
       const msg = $("msg");
       const count = $("cnt");
 
@@ -581,6 +143,10 @@
         msg.className = "msg";
       }
 
+      function updateCount() {
+        count.textContent = message.value.length + "/600";
+      }
+
       function setMode(nextMode) {
         mode = nextMode;
         clearMessage();
@@ -592,13 +158,16 @@
         });
 
         const isSong = mode === "songfess";
+
         songFields.classList.toggle("visible", isSong);
+        songNote.classList.toggle("visible", isSong);
+
         $("messageLabel").textContent =
           isSong ? "Pesan untuk penerima" : "Pesanmu";
 
         message.placeholder = isSong
-          ? "Ceritakan kenapa lagu ini ingin kamu kirim…"
-          : "Tulis apa yang ingin kamu sampaikan…";
+          ? "Lagu ini mengingatkanku padamu..."
+          : "Tulis apa yang ingin kamu sampaikan...";
 
         buttonText.textContent = isSong
           ? "Kirim Songfess"
@@ -608,88 +177,85 @@
       }
 
       document.querySelectorAll(".mode").forEach(btn => {
-        btn.addEventListener("click", () => setMode(btn.dataset.mode));
+        btn.addEventListener("click", () => {
+          setMode(btn.dataset.mode);
+        });
       });
 
-      message.addEventListener("input", () => {
-        count.textContent = message.value.length + "/600";
-      });
+      message.addEventListener("input", updateCount);
 
       form.addEventListener("submit", async event => {
         event.preventDefault();
 
-        // Mencegah pengiriman ganda
         if (sending) return;
 
         const pesan = message.value.trim();
         const dari = sender.value.trim();
-        const website = $("website").value;
 
         if (pesan.length < 2) {
-          showMessage("Tulis pesanmu minimal 2 karakter dulu.", "error");
+          showMessage("Tulis pesan minimal 2 karakter.", "error");
           message.focus();
           return;
         }
 
         if (mode === "songfess" && !song.value.trim()) {
-          showMessage("Isi judul lagu untuk mengirim Songfess.", "error");
+          showMessage("Isi judul lagu terlebih dahulu.", "error");
           song.focus();
           return;
         }
 
-        if (website) {
+        if ($("website").value) {
           showMessage("Pesan tidak dapat diproses.", "error");
           return;
         }
 
-        // Respons UI langsung, tanpa menunggu server
         sending = true;
         button.disabled = true;
         button.classList.add("loading");
-        buttonText.textContent = "Mengirim pesan…";
+        buttonText.textContent = "Mengirim...";
         buttonIcon.classList.add("hidden");
         clearMessage();
 
         try {
           if (typeof api !== "function") {
-            throw new Error("API belum tersedia. Periksa file config.js.");
+            throw new Error("Fungsi api() tidak ditemukan di config.js");
           }
 
-          const payload = {
+          const result = await api({
             action: "send",
             jenis: mode,
             dari: dari || "Anonim",
             pesan: pesan,
             lagu: mode === "songfess" ? song.value.trim() : "",
             penyanyi: mode === "songfess" ? artist.value.trim() : "",
-            website: website
-          };
-
-          const result = await api(payload);
+            website: ""
+          });
 
           if (result && result.ok) {
+            const sentMode = mode;
+
             showMessage(
-              mode === "songfess"
-                ? "Songfess berhasil dikirim. Semoga lagu ini menyampaikan perasaanmu ♡"
+              sentMode === "songfess"
+                ? "Songfess berhasil dikirim. Semoga pesannya sampai ke hati ♡"
                 : "Pesan berhasil dikirim. Terima kasih sudah berbagi ♡",
               "success"
             );
 
             form.reset();
-            count.textContent = "0/600";
-            setMode(mode);
+            updateCount();
+            setMode(sentMode);
           } else {
             showMessage(
               result && result.error
                 ? result.error
-                : "Pesan belum berhasil dikirim. Silakan coba lagi.",
+                : "Gagal mengirim pesan. Silakan coba lagi.",
               "error"
             );
           }
         } catch (error) {
-          console.error("Pengiriman pesan gagal:", error);
+          console.error("Pengiriman gagal:", error);
           showMessage(
-            "Tidak dapat menghubungi server. Periksa koneksi dan konfigurasi API, lalu coba lagi.",
+            "Tidak dapat terhubung ke server. Periksa koneksi dan konfigurasi API.",
             "error"
           );
         } finally {
@@ -697,6 +263,7 @@
           button.disabled = false;
           button.classList.remove("loading");
           buttonIcon.classList.remove("hidden");
+
           buttonText.textContent = mode === "songfess"
             ? "Kirim Songfess"
             : "Kirim pesan rahasia";
